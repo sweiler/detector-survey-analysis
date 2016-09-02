@@ -4,4 +4,17 @@ require_relative 'src/parser'
 require_relative 'src/group_distribution'
 
 filename = ARGV[0]
-puts filename
+
+if filename.nil?
+  puts 'results analyzer'
+  puts '--------------------------'
+  puts ''
+  puts 'Please provide an csv file as the first argument'
+
+  exit
+end
+
+data = Parser.parse_file(filename)
+group_dist = GroupDistribution.new(data)
+
+puts group_dist.counts
