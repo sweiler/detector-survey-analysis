@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+
+require_relative 'src/parser'
+require_relative 'src/group_distribution'
+
+filename = ARGV[0]
+puts filename
