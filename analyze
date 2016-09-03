@@ -4,41 +4,43 @@ require_relative 'src/parser'
 require_relative 'src/usable_data_filter'
 require_relative 'src/group_distribution'
 require_relative 'src/stats'
+require_relative 'src/helper'
 
-def format_duration(duration_secs)
-  mins = (duration_secs / 60).floor
-  secs = (duration_secs - (60 * mins)).round
-  "#{mins}:#{secs} min"
+module MainScript
+  extend Helper
+
+  def self.run
+    filename = ARGV[0]
+
+    if filename.nil?
+      puts 'results analyzer'
+      puts '--------------------------'
+      puts ''
+      puts 'Please provide an csv file as the first argument'
+
+      exit
+    end
+
+    usable_data_filter = UsableDataFilter.new
+
+    data = Parser.parse_file(filename)
+    data = usable_data_filter.filter(data)
+
+    puts "Usable results: #{data.length}"
+
+    group_dist = GroupDistribution.new(data)
+    stats = Stats.new(data)
+
+    duration_secs = stats.avg(:interviewtime)
+
+    min_duration = stats.min(:interviewtime)
+    max_duration = stats.max(:interviewtime)
+
+
+    puts "Interview duration: avg: #{format_duration(duration_secs)}, min: #{format_duration(min_duration)}, max: #{format_duration(max_duration)}"
+
+    puts group_dist.counts
+  end
 end
 
-
-filename = ARGV[0]
-
-if filename.nil?
-  puts 'results analyzer'
-  puts '--------------------------'
-  puts ''
-  puts 'Please provide an csv file as the first argument'
-
-  exit
-end
-
-usable_data_filter = UsableDataFilter.new
-
-data = Parser.parse_file(filename)
-data = usable_data_filter.filter(data)
-
-puts "Usable results: #{data.length}"
-
-group_dist = GroupDistribution.new(data)
-stats = Stats.new(data)
-
-duration_secs = stats.avg(:interviewtime)
-
-min_duration = stats.min(:interviewtime)
-max_duration = stats.max(:interviewtime)
-
-
-puts "Interview duration: avg: #{format_duration(duration_secs)}, min: #{format_duration(min_duration)}, max: #{format_duration(max_duration)}"
-
-puts group_dist.counts
+MainScript.run
