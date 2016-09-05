@@ -6,6 +6,7 @@ require_relative 'group_distribution'
 require_relative 'group_divider'
 require_relative 'stats'
 require_relative 'helper'
+require_relative 'survey_structure'
 
 module MainScript
   extend Helper
@@ -47,10 +48,7 @@ module MainScript
     puts group_dist.counts
     puts ''
 
-    yes_no_questions = {
-        :randMultiple => [:listCheck, :createFile],
-        :randGraphJava => [:fisGraph, :cipherGraph]
-    }
+    yes_no_questions = SurveyStructure.grouped_questions_with_type(:yes_no)
 
     yes_no_questions.each do |group_key, fields|
 

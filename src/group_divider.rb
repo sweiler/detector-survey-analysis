@@ -1,3 +1,4 @@
+require_relative 'survey_structure'
 class GroupDivider
   def self.divide(data)
     self.new(data).run
@@ -49,65 +50,7 @@ class GroupDivider
   end
 
   def group_field_associations
-    {
-        :randMultiple => [
-            [
-                :listCheck, :listCheckTime, :listCheckAdesc, :listCheckAdescTime, :listCheckAsolve, :listCheckAsolveTime,
-                :createFile, :createFileTime, :createFileAdesc, :createFileAdescTime, :createFileAsolve, :createFileAsolveTime,
-            ],
-            [
-                :listCheckControl, :listCheckControlTime, :listCheckCdesc, :listCheckCdescTime, :listCheckCsolve, :listCheckCsolveTime,
-                :createFileControl, :createFileControlTime, :createFileCdesc, :createFileCdescTime, :createFileCsolve, :createFileCsolveTime,
-            ],
-            [
-                :listCheckC2, :listCheckC2Time, :listCheckC2desc, :listCheckC2descTime, :listCheckC2solve, :listCheckC2solveTime,
-                :createFileC2, :createFileC2Time, :createFileC2desc, :createFileC2descTime, :createFileC2solve, :createFileC2solveTime,
-            ]
-        ],
-        :randGraphJava => [
-            [
-                :fisGraph, :fisGraphDesc, :fisGraphSolve, :cipherGraph, :cipherGraphDesc, :cipherGraphSolve,
-                :fisGraphTime, :fisGraphDescTime, :fisGraphSolveTime, :cipherGraphTime, :cipherGraphDescTime, :cipherGraphSolveTime,
-            ],
-            [
-                :fisTT, :fisTTDesc, :fisTTSolve, :cipherTT, :cipherTTDesc, :cipherTTSolve,
-                :fisTTTime, :fisTTDescTime, :fisTTSolveTime, :cipherTTTime, :cipherTTDescTime, :cipherTTSolveTime,
-            ],
-            [
-                :fisJava, :fisJavaDesc, :fisJavaSolve, :cipherJava, :cipherJavaDesc, :cipherJavaSolve,
-                :fisJavaTime, :fisJavaDescTime, :fisJavaSolveTime, :cipherJavaTime, :cipherJavaDescTime, :cipherJavaSolveTime,
-            ]
-        ],
-        :randConf => rand_conf_data
-    }
+    SurveyStructure.random_groups_questions
   end
 
-  def rand_conf_data
-    jdbc_additions = %w[resSet setEm try file stmtClose]
-    byte_buffer_additions = %w[compact rafSeek flip stringbuf]
-
-    [
-        [
-          all_variants('jdbcConfN', jdbc_additions),
-          all_variants('byteBufferConfN', byte_buffer_additions),
-          :jdbcConfNTime, :byteBufferConfNTime
-        ].flatten,
-        [
-          all_variants('jdbcConfC', jdbc_additions),
-          all_variants('byteBufferConfC', byte_buffer_additions),
-          :jdbcConfCTime, :byteBufferConfCTime
-        ].flatten,
-        [
-          all_variants('jdbcConfW', jdbc_additions),
-          all_variants('byteBufferConfW', byte_buffer_additions),
-          :jdbcConfWTime, :byteBufferConfWTime
-        ].flatten,
-    ]
-  end
-
-  def all_variants(base, additions)
-    additions.map do |add|
-      "#{base}[#{add}]".to_sym
-    end.flatten
-  end
 end
