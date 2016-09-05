@@ -77,6 +77,10 @@ class SurveyStructure
     @structure = structure
   end
 
+  def questions_with_type(question_type)
+    @structure[:question_types].keys.select {|key| @structure[:question_types][key] == question_type}
+  end
+
   def grouped_questions_with_type(question_type)
     hashes = questions_per_group.map do |group, questions|
       res = questions.select { |question_id| @structure[:question_types][question_id] == question_type }
@@ -89,6 +93,11 @@ class SurveyStructure
     @structure[:random_groups_questions].map {|key, value| {key => value.flatten}}.reduce({}, :merge)
   end
 
+  def grouping_for_question(question_id)
+    arr = questions_per_group.keys.select {|key| questions_per_group[key].include? question_id }
+    arr[0]
+  end
+
   def random_groups_max_value
     array_of_hashs = @structure[:random_groups_questions].map do |key, value|
       {key => value.length - 1}
@@ -98,5 +107,9 @@ class SurveyStructure
 
   def random_groups_questions
     @structure[:random_groups_questions]
+  end
+
+  def sub_questions(question)
+    @structure[:sub_questions][question]
   end
 end
