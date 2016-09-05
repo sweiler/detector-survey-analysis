@@ -1,13 +1,13 @@
-require_relative 'survey_structure'
 class GroupDistribution
 
-  def initialize(data)
+  def initialize(survey_structure, data)
     @data = data
+    @survey_structure = survey_structure
   end
 
   def counts
-    array_of_hashes = SurveyStructure.random_groups_max_value.keys.map do |field|
-      max_value_for_field = SurveyStructure.random_groups_max_value[field]
+    array_of_hashes = @survey_structure.random_groups_max_value.keys.map do |field|
+      max_value_for_field = @survey_structure.random_groups_max_value[field]
 
       values_for_field = @data.map {|row| row[field]}
 

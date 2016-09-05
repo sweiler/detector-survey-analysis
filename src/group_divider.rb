@@ -1,11 +1,12 @@
 require_relative 'survey_structure'
 class GroupDivider
-  def self.divide(data)
-    self.new(data).run
+  def divide(data)
+    @data = data
+    run
   end
 
-  def initialize(data)
-    @data = data
+  def initialize(survey_structure)
+    @survey_structure = survey_structure
   end
 
   def run
@@ -50,7 +51,7 @@ class GroupDivider
   end
 
   def group_field_associations
-    SurveyStructure.random_groups_questions
+    @survey_structure.random_groups_questions
   end
 
 end

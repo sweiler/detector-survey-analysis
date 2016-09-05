@@ -11,11 +11,15 @@ require_relative 'survey_structure'
 module MainScript
   extend Helper
 
+  def self.survey_structure
+    SurveyStructure.default_survey_structure
+  end
+
   def self.pre_audited_data(filename)
     usable_data_filter = UsableDataFilter.new
     data = Parser.parse_file(filename)
     data = usable_data_filter.filter(data)
-    GroupDivider.divide(data)
+    GroupDivider.new(survey_structure).divide(data)
   end
 
   def self.run
@@ -33,7 +37,7 @@ module MainScript
     data = pre_audited_data(filename)
     puts "Usable results: #{data.length}"
 
-    group_dist = GroupDistribution.new(data)
+    group_dist = GroupDistribution.new(self.survey_structure, data)
     stats = Stats.new(data)
 
     duration_secs = stats.avg(:interviewtime)
@@ -48,7 +52,7 @@ module MainScript
     puts group_dist.counts
     puts ''
 
-    yes_no_questions = SurveyStructure.grouped_questions_with_type(:yes_no)
+    yes_no_questions = self.survey_structure.grouped_questions_with_type(:yes_no)
 
     yes_no_questions.each do |group_key, fields|
 

@@ -1,7 +1,7 @@
 class SurveyStructure
-
-  def self.survey_structure
-    {
+  private
+  def self.default_survey_structure
+    self.new({
         :question_types => {
             :listCheck => :yes_no,
             :createFile => :yes_no,
@@ -39,7 +39,7 @@ class SurveyStructure
             ],
             :randConf => self.confidence_questions
         }
-    }
+    })
   end
 
   def self.confidence_questions
@@ -65,33 +65,38 @@ class SurveyStructure
     ]
   end
 
-
   def self.all_variants(base, additions)
     additions.map do |add|
       "#{base}[#{add}]".to_sym
     end.flatten
   end
 
-  def self.grouped_questions_with_type(question_type)
+  public
+
+  def initialize(structure)
+    @structure = structure
+  end
+
+  def grouped_questions_with_type(question_type)
     hashes = questions_per_group.map do |group, questions|
-      res = questions.select { |question_id| self.survey_structure[:question_types][question_id] == question_type }
+      res = questions.select { |question_id| @structure[:question_types][question_id] == question_type }
       {group => res}
     end
     hashes.reduce({}, :merge).reject { |_, questions| questions.empty? }
   end
 
-  def self.questions_per_group
-    self.survey_structure[:random_groups_questions].map {|key, value| {key => value.flatten}}.reduce({}, :merge)
+  def questions_per_group
+    @structure[:random_groups_questions].map {|key, value| {key => value.flatten}}.reduce({}, :merge)
   end
 
-  def self.random_groups_max_value
-    array_of_hashs = self.survey_structure[:random_groups_questions].map do |key, value|
+  def random_groups_max_value
+    array_of_hashs = @structure[:random_groups_questions].map do |key, value|
       {key => value.length - 1}
     end
     array_of_hashs.reduce({}, :merge)
   end
 
-  def self.random_groups_questions
-    self.survey_structure[:random_groups_questions]
+  def random_groups_questions
+    @structure[:random_groups_questions]
   end
 end
