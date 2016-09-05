@@ -6,7 +6,24 @@ class SurveyStructure
             :listCheck => :yes_no,
             :createFile => :yes_no,
             :fisGraph => :yes_no,
-            :cipherGraph => :yes_no
+            :cipherGraph => :yes_no,
+            :jdbcConfN => :matrixA1A5,
+            :byteBufferConfN => :matrixA1A5
+        },
+        :sub_questions => {
+            :jdbcConfN => {
+                'jdbcConfN[resSet]'.to_sym => 'A2',
+                'jdbcConfN[setEm]'.to_sym => 'A1',
+                'jdbcConfN[try]'.to_sym => 'A4',
+                'jdbcConfN[file]'.to_sym => 'A3',
+                'jdbcConfN[stmtClose]'.to_sym => 'A4'
+            },
+            :byteBufferConfN => {
+                'byteBufferConfN[compact]'.to_sym => 'A2',
+                'byteBufferConfN[rafSeek]'.to_sym => 'A3',
+                'byteBufferConfN[flip]'.to_sym => 'A4',
+                'byteBufferConfN[stringbuf]'.to_sym => 'A1'
+            }
         },
         :random_groups_questions => {
             :randMultiple => [

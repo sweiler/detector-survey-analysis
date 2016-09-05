@@ -7,6 +7,7 @@ require_relative 'group_divider'
 require_relative 'stats'
 require_relative 'helper'
 require_relative 'survey_structure'
+require_relative 'matrix_question_stats'
 
 module MainScript
   extend Helper
@@ -70,5 +71,11 @@ module MainScript
       puts '------------------------------'
       puts ''
     end
+
+    puts 'CONFIDENCE:'
+    puts '----------------------------'
+    matrix = MatrixQuestionStats.new(survey_structure, data)
+    puts matrix.correctness
+
   end
 end
