@@ -8,6 +8,7 @@ require_relative 'stats'
 require_relative 'helper'
 require_relative 'survey_structure'
 require_relative 'matrix_question_stats'
+require_relative 'diagram'
 
 module MainScript
   extend Helper
@@ -55,22 +56,23 @@ module MainScript
 
     yes_no_questions = self.survey_structure.grouped_questions_with_type(:yes_no)
 
+
     yes_no_questions.each do |group_key, fields|
+      diagram_data = {}
 
       (0..2).each do |idx|
-        puts "Stats for #{group_key} == #{idx}"
         fields.each do |field|
+          field_label = self.survey_structure.field_label(field)
+          if diagram_data[field_label].nil?
+            diagram_data[field_label] = [0, 0, 0]
+          end
           ratio = stats.yes_no_ratio_with_group(field, group_key, idx)
-          ratio = (ratio * 10000).round / 100.0
-          puts "#{field} is #{ratio}%"
+          diagram_data[field_label][idx] = ratio
         end
-        puts ''
       end
-
-      puts ''
-      puts '------------------------------'
-      puts ''
+      Diagram.new_yes_no(self.survey_structure.group_labels_for_group(group_key), diagram_data).write_file(group_key.to_s + '.svg')
     end
+
 
     puts 'CONFIDENCE:'
     puts '----------------------------'

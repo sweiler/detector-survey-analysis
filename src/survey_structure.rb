@@ -1,4 +1,5 @@
 class SurveyStructure
+
   private
   def self.default_survey_structure
     self.new({
@@ -24,6 +25,16 @@ class SurveyStructure
                 'byteBufferConfN[flip]'.to_sym => 'A4',
                 'byteBufferConfN[stringbuf]'.to_sym => 'A1'
             }
+        },
+        :group_labels => {
+            :randMultiple => ['Two patterns side-by-side', 'Only first pattern', 'Only second pattern'],
+            :randGraphJava => ['Graph visualization', 'Basic code visualization', 'Correct java code']
+        },
+        :field_labels => {
+            :listCheck => 'List check not empty',
+            :createFile => 'Create file in directory',
+            :fisGraph => 'Close FileInputStream',
+            :cipherGraph => 'Call Cipher.doFinal'
         },
         :random_groups_questions => {
             :randMultiple => [
@@ -128,5 +139,13 @@ class SurveyStructure
 
   def sub_questions(question)
     @structure[:sub_questions][question]
+  end
+
+  def group_labels_for_group(group_key)
+    @structure[:group_labels][group_key]
+  end
+
+  def field_label(field)
+    @structure[:field_labels][field]
   end
 end

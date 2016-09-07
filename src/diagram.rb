@@ -2,7 +2,7 @@ require 'erb'
 
 class Diagram
 
-  attr_accessor :groups
+  attr_accessor :groups, :legend
 
   def write_file(filename)
     erb = ERB.new(template)
@@ -27,7 +27,7 @@ class Diagram
 
   <%= y_axis %>
 
-  <%= line(padding, baseline, width - padding, baseline) %>
+  <%= line(padding, baseline, width - padding - legend_width, baseline) %>
 
   <% groups.each_with_index do |group, idx| %>
     <%= text(group_x_center(idx), baseline + default_font_size, group[:label]) %>
@@ -36,12 +36,17 @@ class Diagram
     <% end %>
   <% end %>
 
+  <% legend.each_with_index do |legend_entry, idx| %>
+    <%= rect(legend_start_x, legend_start_y(idx), legend_start_x + 20, legend_start_y(idx) + 20, colors[idx]) %>
+    <%= text(legend_start_x + 40, legend_start_y(idx) + 20, legend_entry, anchor: 'start') %>
+  <% end %>
+
 </svg>
 EOT
   end
 
   def colors
-    ['green', 'blue', 'red']
+    %w(#aa0000 #00aa00 #0000aa #eeee00)
   end
 
   def group_width(idx)
@@ -56,6 +61,10 @@ EOT
     350
   end
 
+  def legend_width
+    350
+  end
+
   def group_x_center(idx)
     group_start_x(idx) + group_width(idx) / 2
   end
@@ -65,7 +74,7 @@ EOT
   end
 
   def width
-    padding + group_start_x(groups.length)
+    padding + group_start_x(groups.length) + legend_width
   end
 
   def height
@@ -81,11 +90,19 @@ EOT
   end
 
   def group_margin
-    20
+    80
   end
 
   def bar_margin
     10
+  end
+
+  def legend_start_x
+    group_start_x(groups.length) + 20
+  end
+
+  def legend_start_y(idx)
+    padding + 30 + 40 * idx
   end
 
   def bar_start(group_idx, bar_idx)
@@ -106,7 +123,7 @@ EOT
     (0..steps).each do |step|
       y = baseline - step * (baseline - padding) / steps
       res += line(padding - 5, y, padding + 5, y)
-      res += text(padding - 45, y + 7, "#{step * 100 / steps} %", 20)
+      res += text(padding - 45, y + 7, "#{step * 100 / steps} %", font_size: 20)
     end
     res
   end
@@ -115,20 +132,26 @@ EOT
     "<line x1=\"#{x1}\" x2=\"#{x2}\" y1=\"#{y1}\" y2=\"#{y2}\" stroke=\"black\" stroke-width=\"3\" />"
   end
 
-  def text(x, y, text, font_size = default_font_size)
-    "<text x=\"#{x}\" y=\"#{y}\" fill=\"black\" style=\"font-size: #{font_size}px; font-family: Helvetica;\" text-anchor=\"middle\">#{text}</text>"
+  def text(x, y, text, options = {})
+    font_size = options[:font_size] || default_font_size
+    anchor = options[:anchor] || 'middle'
+
+    "<text x=\"#{x}\" y=\"#{y}\" fill=\"black\" style=\"font-size: #{font_size}px; font-family: Helvetica;\" text-anchor=\"#{anchor}\">#{text}</text>"
   end
 
   def rect(x1, y1, x2, y2, fill = 'green')
-    r_width = x2 - x1
-    r_height = y2 - y1
-    "<rect x=\"#{x1}\" y=\"#{y2}\" width=\"#{r_width}\" height=\"#{r_height}\" fill=\"#{fill}\" />"
+    r_width = (x2 - x1).abs
+    r_height = (y2 - y1).abs
+    start_x = [x1, x2].min
+    start_y = [y1, y2].min
+    "<rect x=\"#{start_x}\" y=\"#{start_y}\" width=\"#{r_width}\" height=\"#{r_height}\" fill=\"#{fill}\" />"
   end
 end
 
 class YesNoDiagram < Diagram
 
   def initialize(group_labels, data)
+    self.legend = group_labels
     self.groups = data.map {|key, value| {:label => key, :data => value}}
   end
 
