@@ -24,7 +24,7 @@ class Diagram
 <svg xmlns="http://www.w3.org/2000/svg"
 	version="1.1" baseProfile="full"
 	width="<%= width %>px" height="<%= height %>px" viewBox="0 0 <%= width %> <%= height %>">
-
+  <%= rect(0, 0, width, height, 'white') %>
   <%= y_axis %>
 
   <%= line(padding, baseline, width - padding - legend_width, baseline) %>
@@ -155,4 +155,17 @@ class YesNoDiagram < Diagram
     self.groups = data.map {|key, value| {:label => key, :data => value}}
   end
 
+end
+
+class Histogram < Diagram
+  def initialize(labels, histogram_data)
+    self.legend = labels
+
+    self.groups = (1..5).map {|i| {:label => label_for(i), :data => histogram_data.map {|g| g[i-1]}}}
+  end
+
+  def label_for(i)
+    labels = ['not related', 'related, not useful', 'useful, must be adapted', 'perfectly useful', 'I don\'t know']
+    labels[i-1]
+  end
 end

@@ -45,13 +45,15 @@ class MatrixQuestionStats
       sub_hashes = sub_questions.keys.map do |sub_question_id|
         histograms = (0..max_grouping_value).map do |group|
           histo = [0, 0, 0, 0, 0]
+          sum = 0.0
           @data.each do |row|
             if row[question_grouping_id] == group
               value = row[sub_question_id]
               histo[possible_values.index(value)] += 1
+              sum += 1
             end
           end
-          histo
+          histo.map {|v| v / sum}
         end
         {sub_question_id => histograms}
       end

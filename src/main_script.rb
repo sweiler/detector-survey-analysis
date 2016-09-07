@@ -73,11 +73,13 @@ module MainScript
       Diagram.new_yes_no(self.survey_structure.group_labels_for_group(group_key), diagram_data).write_file(group_key.to_s + '.svg')
     end
 
-
-    puts 'CONFIDENCE:'
-    puts '----------------------------'
     matrix = MatrixQuestionStats.new(survey_structure, data)
-    puts matrix.correctness
+    matrix.histogram.each do |question, subquestion_data|
+      group = self.survey_structure.grouping_for_question((question.to_s + 'Time').to_sym)
+      subquestion_data.each do |subquestion, histograms|
+        Histogram.new(self.survey_structure.group_labels_for_group(group), histograms).write_file(subquestion.to_s + '.svg')
+      end
 
+    end
   end
 end

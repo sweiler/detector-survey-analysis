@@ -28,7 +28,8 @@ class SurveyStructure
         },
         :group_labels => {
             :randMultiple => ['Two patterns side-by-side', 'Only first pattern', 'Only second pattern'],
-            :randGraphJava => ['Graph visualization', 'Basic code visualization', 'Correct java code']
+            :randGraphJava => ['Graph visualization', 'Basic code visualization', 'Correct java code'],
+            :randConf => ['No confidence value', 'Useful confidence value', 'Wrong confidence value']
         },
         :field_labels => {
             :listCheck => 'List check not empty',
