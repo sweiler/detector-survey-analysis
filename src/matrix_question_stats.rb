@@ -5,7 +5,6 @@ class MatrixQuestionStats
   end
 
   def correctness
-    questions = @survey_structure.questions_with_type(:matrixA1A5)
     hashes = questions.map do |question_id|
 
       sub_questions = @survey_structure.sub_questions(question_id)
@@ -34,5 +33,38 @@ class MatrixQuestionStats
     end
 
     hashes.reduce({}, :merge)
+  end
+
+  def histogram
+    possible_values = %w(A1 A2 A3 A4 A5)
+    hashes = questions.map do |question_id|
+      sub_questions = @survey_structure.sub_questions(question_id)
+      question_grouping_id = @survey_structure.grouping_for_question(sub_questions.keys[0])
+      max_grouping_value = @survey_structure.random_groups_max_value[question_grouping_id]
+
+      sub_hashes = sub_questions.keys.map do |sub_question_id|
+        histograms = (0..max_grouping_value).map do |group|
+          histo = [0, 0, 0, 0, 0]
+          @data.each do |row|
+            if row[question_grouping_id] == group
+              value = row[sub_question_id]
+              histo[possible_values.index(value)] += 1
+            end
+          end
+          histo
+        end
+        {sub_question_id => histograms}
+      end
+      res = sub_hashes.reduce({}, :merge)
+
+      {question_id => res}
+    end
+
+    hashes.reduce({}, :merge)
+  end
+
+  private
+  def questions
+    @survey_structure.questions_with_type(:matrixA1A5)
   end
 end

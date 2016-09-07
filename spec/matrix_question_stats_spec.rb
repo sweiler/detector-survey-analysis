@@ -23,17 +23,17 @@ RSpec.describe MatrixQuestionStats do
       }
   )
 
+  data = [
+      {:randA => 0, :questionAx => 'A3', :questionAy => 'A2', :questionAz => 'A5'}, # 1/3
+      {:randA => 1, :questionBx => 'A3', :questionBy => 'A5', :questionBz => 'A1'}, # 2/3
+      {:randA => 1, :questionBx => 'A2', :questionBy => 'A5', :questionBz => 'A1'},  # 1/3
+      {:randA => 2, :questionCx => 'A3', :questionCy => 'A5', :questionCz => 'A2'},  # 3/3
+  ]
+
+  divided_data = GroupDivider.new(survey_structure).divide(data)
+  uut = MatrixQuestionStats.new(survey_structure, divided_data)
+
   it 'generates correctness percentage stats' do
-    data = [
-        {:randA => 0, :questionAx => 'A3', :questionAy => 'A2', :questionAz => 'A5'}, # 1/3
-        {:randA => 1, :questionBx => 'A3', :questionBy => 'A5', :questionBz => 'A1'}, # 2/3
-        {:randA => 1, :questionBx => 'A2', :questionBy => 'A5', :questionBz => 'A1'},  # 1/3
-        {:randA => 2, :questionCx => 'A3', :questionCy => 'A5', :questionCz => 'A2'},  # 3/3
-    ]
-    divided_data = GroupDivider.new(survey_structure).divide(data)
-
-    uut = MatrixQuestionStats.new(survey_structure, divided_data)
-
     result = uut.correctness
     expected = {
         :questionA => [1.0/3.0, 0.5, 1]
@@ -41,4 +41,30 @@ RSpec.describe MatrixQuestionStats do
 
     expect(result).to eq(expected)
   end
+
+  it 'generates a histogram' do
+    result = uut.histogram
+    expected = {
+        :questionA => {
+            :questionAx => [
+                [0, 0, 1, 0, 0],
+                [0, 1, 1, 0, 0],
+                [0, 0, 1, 0, 0]
+            ],
+            :questionAy => [
+                [0, 1, 0, 0, 0],
+                [0, 0, 0, 0, 2],
+                [0, 0, 0, 0, 1]
+            ],
+            :questionAz => [
+                [0, 0, 0, 0, 1],
+                [2, 0, 0, 0, 0],
+                [0, 1, 0, 0, 0]
+            ]
+        }
+    }
+
+    expect(result).to eq(expected)
+  end
+
 end
