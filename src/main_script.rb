@@ -81,5 +81,7 @@ module MainScript
       end
 
     end
+    
+    puts matrix.correctness
   end
 end
