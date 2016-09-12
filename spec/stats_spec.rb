@@ -20,6 +20,14 @@ RSpec.describe Stats do
     it 'computes a Y/N ratio' do
       expect(uut.yes_no_ratio(:y)).to eq(2.0/3.0)
     end
+
+    it 'doesn\'t fail when dividing by zero' do
+      uut2 = Stats.new([])
+      expect(uut2.avg(:x)).to eq(0)
+      expect(uut2.min(:x)).to eq(0)
+      expect(uut2.max(:x)).to eq(0)
+      expect(uut2.yes_no_ratio(:y)).to eq(0)
+    end
   end
 
   context 'with grouped example data' do

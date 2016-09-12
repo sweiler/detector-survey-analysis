@@ -29,4 +29,10 @@ RSpec.describe UsableDataFilter do
     expect(uut.filter(example_data)).to eq([{:content => 3}])
   end
 
+  it 'can filter with question specific "usable" flags' do
+    example_data = [{}, {:usableMultiple => true}, {:usableMultiple => false}]
+    uut = UsableDataFilter.new
+    expect(uut.filter_with_flag(example_data, :usableMultiple)).to eq([{:usableMultiple => true}])
+  end
+
 end

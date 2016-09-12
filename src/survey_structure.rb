@@ -37,6 +37,10 @@ class SurveyStructure
             :fisGraph => 'Close FileInputStream',
             :cipherGraph => 'Call Cipher.doFinal'
         },
+        :usable_flags => {
+            :randMultiple => :usefulMultiple,
+            :randGraphJava => :usefulGraph
+        },
         :random_groups_questions => {
             :randMultiple => [
                 [
@@ -116,6 +120,10 @@ class SurveyStructure
       {group => res}
     end
     hashes.reduce({}, :merge).reject { |_, questions| questions.empty? }
+  end
+
+  def usable_flag_for_group(group_key)
+    @structure[:usable_flags][group_key]
   end
 
   def questions_per_group

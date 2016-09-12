@@ -78,4 +78,15 @@ RSpec.describe GroupDivider do
 
     expect(divided).to eq(expected)
   end
+
+  it 'ignores missing grouping values' do
+    data = [
+        {},
+        {:listCheck => 'Y'}
+    ]
+
+    divided = uut.divide(data)
+
+    expect(divided).to eq(data)
+  end
 end

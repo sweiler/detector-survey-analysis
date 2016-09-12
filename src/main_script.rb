@@ -1,5 +1,5 @@
-require 'json'
 
+require 'json'
 require_relative 'parser'
 require_relative 'usable_data_filter'
 require_relative 'group_distribution'
@@ -9,6 +9,7 @@ require_relative 'helper'
 require_relative 'survey_structure'
 require_relative 'matrix_question_stats'
 require_relative 'diagram'
+require_relative 'manual_data'
 
 module MainScript
   extend Helper
@@ -18,10 +19,8 @@ module MainScript
   end
 
   def self.pre_audited_data(filename)
-    usable_data_filter = UsableDataFilter.new
     data = Parser.parse_file(filename)
-    data = usable_data_filter.filter(data)
-    GroupDivider.new(survey_structure).divide(data)
+    data = GroupDivider.new(survey_structure).divide(data)
   end
 
   def self.run
@@ -36,29 +35,83 @@ module MainScript
       exit
     end
 
+    manual_data = ManualData.new
+
     data = pre_audited_data(filename)
-    puts "Usable results: #{data.length}"
+    json_name = filename.sub /\.[^.]+\z/, '-manual-data.json'
 
-    group_dist = GroupDistribution.new(self.survey_structure, data)
-    stats = Stats.new(data)
+    if File.exist? json_name
+      manual_data = ManualData.new(File.read(json_name))
+    end
 
-    duration_secs = stats.avg(:interviewtime)
+    augmented_data = manual_data.augment(data)
 
-    min_duration = stats.min(:interviewtime)
-    max_duration = stats.max(:interviewtime)
+    if ARGV[1] == '--select-usable-rows'
 
+      augmented_data.each do |row|
+        cpy = row.clone
+        keys_to_show = %w(id lastpage randMultiple listCheck listCheckAdesc listCheckAsolve createFile createFileAdesc createFileAsolve fisGraph fisGraphDesc fisGraphSolve cipherGraph cipherGraphDesc cipherGraphSolve)
+        cpy.keep_if {|key, _| keys_to_show.include? key.to_s}
+        puts JSON.pretty_generate(cpy)
+        puts ''
+        puts 'Is this row useful for multiple patterns?'
+        puts '(Y)es, (N)o or (S)kip: > '
+        selection = $stdin.gets.chomp.upcase
+        if selection == 'Y'
+          puts 'This row is saved as useful.'
+          manual_data.add_data(row[:id], {:usefulMultiple => true})
+        elsif selection == 'N'
+          puts 'This row is saved as not useful.'
+          manual_data.add_data(row[:id], {:usefulMultiple => false})
+        else
+          puts 'This row is skipped. Run the command again to change your selection.'
+        end
+        puts ''
+        puts 'Is this row useful for graph patterns?'
+        puts '(Y)es, (N)o or (S)kip: > '
+        selection = $stdin.gets.chomp.upcase
+        if selection == 'Y'
+          puts 'This row is saved as useful.'
+          manual_data.add_data(row[:id], {:usefulGraph => true})
+        elsif selection == 'N'
+          puts 'This row is saved as not useful.'
+          manual_data.add_data(row[:id], {:usefulGraph => false})
+        else
+          puts 'This row is skipped. Run the command again to change your selection.'
+        end
 
-    puts "Interview duration: avg: #{format_duration(duration_secs)}, min: #{format_duration(min_duration)}, max: #{format_duration(max_duration)}"
-    puts ''
+        puts ''
+        puts ''
+      end
 
-    puts group_dist.counts
-    puts ''
+      File.write(json_name, manual_data.to_json)
+
+      exit
+    end
+
 
     yes_no_questions = self.survey_structure.grouped_questions_with_type(:yes_no)
 
 
     yes_no_questions.each do |group_key, fields|
       diagram_data = {}
+      usable_data = UsableDataFilter.new.filter_with_flag(augmented_data, survey_structure.usable_flag_for_group(group_key))
+
+      group_dist = GroupDistribution.new(self.survey_structure, usable_data)
+      stats = Stats.new(usable_data)
+
+      duration_secs = stats.avg(:interviewtime)
+
+      min_duration = stats.min(:interviewtime)
+      max_duration = stats.max(:interviewtime)
+
+      puts "Results for grouping with #{group_key.to_s}"
+      puts "Interview duration: avg: #{format_duration(duration_secs)}, min: #{format_duration(min_duration)}, max: #{format_duration(max_duration)}"
+      puts ''
+
+      puts 'Group distribution:'
+      puts group_dist.counts[group_key].each_with_index.map {|g, i| "#{survey_structure.group_labels_for_group(group_key)[i]}: #{g}"}
+      puts ''
 
       (0..2).each do |idx|
         fields.each do |field|
@@ -72,6 +125,8 @@ module MainScript
       end
       Diagram.new_yes_no(self.survey_structure.group_labels_for_group(group_key), diagram_data).write_file(group_key.to_s + '.svg')
     end
+
+    data = UsableDataFilter.new.filter(data)
 
     matrix = MatrixQuestionStats.new(survey_structure, data)
     matrix.histogram.each do |question, subquestion_data|

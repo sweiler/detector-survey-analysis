@@ -14,11 +14,11 @@ class Stats
   end
 
   def min(column)
-    values_for_column(column).min
+    values_for_column(column).min || 0
   end
 
   def max(column)
-    values_for_column(column).max
+    values_for_column(column).max || 0
   end
 
   def yes_no_ratio(column)
@@ -38,7 +38,11 @@ class Stats
   end
 
   def array_avg(num_array)
-    num_array.reduce(0, :+) / num_array.length
+    if num_array.empty?
+      0
+    else
+      num_array.reduce(0, :+) / num_array.length
+    end
   end
 
   def values_per_group(column, grouping_column, group_id)

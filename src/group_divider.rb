@@ -14,7 +14,7 @@ class GroupDivider
 
      fields_per_group = group_field_associations.map do |rand_field, grouped_fields|
         rand_group = row[rand_field]
-        if rand_group.nil?
+        if rand_group.nil? || rand_group == ''
           {}
         else
           group_zero_fields = grouped_fields[0]
