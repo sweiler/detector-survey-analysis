@@ -45,46 +45,32 @@ module MainScript
     end
 
     augmented_data = manual_data.augment(data)
+    augmented_data.reject! {|row| row == {}}
 
     if ARGV[1] == '--select-usable-rows'
 
-      augmented_data.each do |row|
-        cpy = row.clone
-        keys_to_show = %w(id lastpage randMultiple listCheck listCheckAdesc listCheckAsolve createFile createFileAdesc createFileAsolve fisGraph fisGraphDesc fisGraphSolve cipherGraph cipherGraphDesc cipherGraphSolve)
-        cpy.keep_if {|key, _| keys_to_show.include? key.to_s}
-        puts JSON.pretty_generate(cpy)
-        puts ''
-        puts 'Is this row useful for multiple patterns?'
-        puts '(Y)es, (N)o or (S)kip: > '
-        selection = $stdin.gets.chomp.upcase
-        if selection == 'Y'
-          puts 'This row is saved as useful.'
-          manual_data.add_data(row[:id], {:usefulMultiple => true})
-        elsif selection == 'N'
-          puts 'This row is saved as not useful.'
-          manual_data.add_data(row[:id], {:usefulMultiple => false})
-        else
-          puts 'This row is skipped. Run the command again to change your selection.'
-        end
-        puts ''
-        puts 'Is this row useful for graph patterns?'
-        puts '(Y)es, (N)o or (S)kip: > '
-        selection = $stdin.gets.chomp.upcase
-        if selection == 'Y'
-          puts 'This row is saved as useful.'
-          manual_data.add_data(row[:id], {:usefulGraph => true})
-        elsif selection == 'N'
-          puts 'This row is saved as not useful.'
-          manual_data.add_data(row[:id], {:usefulGraph => false})
-        else
-          puts 'This row is skipped. Run the command again to change your selection.'
-        end
+      keys_to_show = %w(id lastpage randMultiple listCheck listCheckAdesc listCheckAsolve createFile createFileAdesc createFileAsolve)
+      augment_manually(augmented_data, json_name, keys_to_show, manual_data, :usefulMultiple)
 
-        puts ''
-        puts ''
-      end
+      keys_to_show = %w(id lastpage randGraph fisGraph fisGraphDesc fisGraphSolve cipherGraph cipherGraphDesc cipherGraphSolve)
+      augment_manually(augmented_data, json_name, keys_to_show, manual_data, :usefulGraph)
 
-      File.write(json_name, manual_data.to_json)
+      exit
+    elsif ARGV[1] == '--manual-assessment'
+      keys_to_show = %w(id listCheck listCheckAdesc listCheckAsolve)
+      d = UsableDataFilter.new.filter_with_flag(augmented_data, :usefulMultiple)
+
+      augment_manually(d, json_name, keys_to_show, manual_data, :understoodListCheck)
+
+      keys_to_show = %w(id createFile createFileAdesc createFileAsolve)
+      augment_manually(d, json_name, keys_to_show, manual_data, :understoodCreateFile)
+
+      d = UsableDataFilter.new.filter_with_flag(augmented_data, :usefulGraph)
+      keys_to_show = %w(id fisGraph fisGraphDesc fisGraphSolve)
+      augment_manually(d, json_name, keys_to_show, manual_data, :understoodFisExists)
+
+      keys_to_show = %w(id cipherGraph cipherGraphDesc cipherGraphSolve)
+      augment_manually(d, json_name, keys_to_show, manual_data, :understoodCipher)
 
       exit
     end
@@ -92,7 +78,7 @@ module MainScript
 
     yes_no_questions = self.survey_structure.grouped_questions_with_type(:yes_no)
 
-
+    puts yes_no_questions
     yes_no_questions.each do |group_key, fields|
       diagram_data = {}
       usable_data = UsableDataFilter.new.filter_with_flag(augmented_data, survey_structure.usable_flag_for_group(group_key))
@@ -138,5 +124,33 @@ module MainScript
     end
     
     puts matrix.correctness
+  end
+
+  def self.augment_manually(data, json_name, keys_to_show, manual_data, field)
+    data.each do |row|
+      if row[field].nil?
+        cpy = row.clone
+        cpy.keep_if { |key, _| keys_to_show.include? key.to_s }
+
+        puts JSON.pretty_generate(cpy)
+        puts ''
+        puts field.to_s
+        puts '(Y)es, (N)o or (S)kip: > '
+        selection = $stdin.gets.chomp.upcase
+        if selection == 'Y'
+          puts 'Saved as Yes'
+          manual_data.add_data(row[:id], {field => true})
+        elsif selection == 'N'
+          puts 'Saved as No'
+          manual_data.add_data(row[:id], {field => false})
+        else
+          puts 'The row is skipped.'
+        end
+
+        File.write(json_name, manual_data.to_json)
+        puts ''
+        puts ''
+      end
+    end
   end
 end

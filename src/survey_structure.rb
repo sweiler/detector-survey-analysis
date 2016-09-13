@@ -8,6 +8,10 @@ class SurveyStructure
             :createFile => :yes_no,
             :fisGraph => :yes_no,
             :cipherGraph => :yes_no,
+            :understoodListCheck => :yes_no,
+            :understoodCreateFile => :yes_no,
+            :understoodFisExists => :yes_no,
+            :understoodCipher => :yes_no,
             :jdbcConfN => :matrixA1A5,
             :byteBufferConfN => :matrixA1A5
         },
@@ -34,8 +38,12 @@ class SurveyStructure
         :field_labels => {
             :listCheck => 'List check not empty',
             :createFile => 'Create file in directory',
-            :fisGraph => 'Close FileInputStream',
-            :cipherGraph => 'Call Cipher.doFinal'
+            :fisGraph => 'FileInputStream if file exists',
+            :cipherGraph => 'Call Cipher.doFinal',
+            :understoodListCheck => 'Understood list check',
+            :understoodCreateFile => 'Understood create file',
+            :understoodFisExists => 'Understood fis exists',
+            :understoodCipher => 'Understood cipher doFinal'
         },
         :usable_flags => {
             :randMultiple => :usefulMultiple,
@@ -71,6 +79,10 @@ class SurveyStructure
                 ]
             ],
             :randConf => self.confidence_questions
+        },
+        :other_randomized_questions => {
+            :randMultiple => [:understoodListCheck, :understoodCreateFile],
+            :randGraphJava => [:understoodFisExists, :understoodCipher]
         }
     })
   end
@@ -127,7 +139,9 @@ class SurveyStructure
   end
 
   def questions_per_group
-    @structure[:random_groups_questions].map {|key, value| {key => value.flatten}}.reduce({}, :merge)
+    hsh = @structure[:random_groups_questions].map {|key, value| {key => value.flatten}}.reduce({}, :merge)
+    @structure[:other_randomized_questions].each {|grp, questions| hsh[grp] += questions}
+    hsh
   end
 
   def grouping_for_question(question_id)

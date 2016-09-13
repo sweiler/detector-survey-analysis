@@ -50,6 +50,6 @@ class Stats
   end
 
   def convert_yn_to_10(values)
-    values.map { |v| v == 'Y' ? 1.0 : 0.0 }
+    values.map { |v| v == 'Y' || v == true ? 1.0 : 0.0 }
   end
 end
