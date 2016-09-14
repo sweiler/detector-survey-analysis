@@ -10,6 +10,7 @@ require_relative 'survey_structure'
 require_relative 'matrix_question_stats'
 require_relative 'diagram'
 require_relative 'manual_data'
+require_relative 'statsig'
 
 module MainScript
   extend Helper
@@ -99,6 +100,7 @@ module MainScript
       puts group_dist.counts[group_key].each_with_index.map {|g, i| "#{survey_structure.group_labels_for_group(group_key)[i]}: #{g}"}
       puts ''
 
+
       (0..2).each do |idx|
         fields.each do |field|
           field_label = self.survey_structure.field_label(field)
@@ -107,6 +109,16 @@ module MainScript
           end
           ratio = stats.yes_no_ratio_with_group(field, group_key, idx)
           diagram_data[field_label][idx] = ratio
+        end
+      end
+      fields.each do |field|
+        (0..2).each do |group_a|
+          (0..2).each do |group_b|
+            if group_a != group_b
+              sig = Statsig.significance_a_greater_b(usable_data, group_key, group_a, group_b, field)
+              puts "significance niveau for #{group_key} #{group_a} > #{group_b} in #{field}: #{sig}" if sig < 0.3
+            end
+          end
         end
       end
       Diagram.new_yes_no(self.survey_structure.group_labels_for_group(group_key), diagram_data).write_file(group_key.to_s + '.svg')
@@ -122,8 +134,9 @@ module MainScript
       end
 
     end
-    
+
     puts matrix.correctness
+
   end
 
   def self.augment_manually(data, json_name, keys_to_show, manual_data, field)

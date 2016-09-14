@@ -140,7 +140,7 @@ class SurveyStructure
 
   def questions_per_group
     hsh = @structure[:random_groups_questions].map {|key, value| {key => value.flatten}}.reduce({}, :merge)
-    @structure[:other_randomized_questions].each {|grp, questions| hsh[grp] += questions}
+    @structure[:other_randomized_questions].each {|grp, questions| hsh[grp] += questions} unless @structure[:other_randomized_questions].nil?
     hsh
   end
 
