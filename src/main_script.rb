@@ -21,6 +21,11 @@ module MainScript
 
   def self.pre_audited_data(filename)
     data = Parser.parse_file(filename)
+    dhl_name = filename.sub(/\.[^.]+\z/, '_dhl.csv')
+    if File.exist?(dhl_name)
+      data_dhl = Parser.parse_file(dhl_name)
+      data += data_dhl
+    end
     data = GroupDivider.new(survey_structure).divide(data)
   end
 
@@ -116,7 +121,7 @@ module MainScript
           (0..2).each do |group_b|
             if group_a != group_b
               sig = Statsig.significance_a_greater_b(usable_data, group_key, group_a, group_b, field)
-              puts "significance niveau for #{group_key} #{group_a} > #{group_b} in #{field}: #{sig}" if sig < 0.3
+              puts "significance niveau for #{group_key} #{group_a} > #{group_b} in #{field}: #{sig}" if sig < 0.15
             end
           end
         end
