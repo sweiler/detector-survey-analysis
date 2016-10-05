@@ -38,6 +38,8 @@ class Stats
   end
 
   def array_avg(num_array)
+    num_array = num_array.clone
+    num_array.reject! {|n| n.nil?}
     if num_array.empty?
       0
     else

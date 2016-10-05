@@ -11,6 +11,8 @@ require_relative 'matrix_question_stats'
 require_relative 'diagram'
 require_relative 'manual_data'
 require_relative 'statsig'
+require_relative 'boxplot'
+require_relative 'boxplot_diagram'
 
 module MainScript
   extend Helper
@@ -117,16 +119,36 @@ module MainScript
         end
       end
       fields.each do |field|
+        timing_key = (field.to_s + 'Time').to_sym
         (0..2).each do |group_a|
           (0..2).each do |group_b|
             if group_a != group_b
-              sig = Statsig.significance_a_greater_b(usable_data, group_key, group_a, group_b, field)
+              sig = Statsig.significance_a_greater_b_binary(usable_data, group_key, group_a, group_b, field)
               puts "significance niveau for #{group_key} #{group_a} > #{group_b} in #{field}: #{sig}" if sig < 0.15
             end
           end
         end
       end
       Diagram.new_yes_no(self.survey_structure.group_labels_for_group(group_key), diagram_data).write_file(group_key.to_s + '.svg')
+
+
+    end
+
+    boxplots = survey_structure.grouped_questions_with_type(:time)
+    boxplots.each do |group_key, fields|
+      usable_data = UsableDataFilter.new.filter_with_flag(augmented_data, survey_structure.usable_flag_for_group(group_key))
+
+      fields.each do |field|
+        boxplots = []
+        (0..2).each do |group_idx|
+          d = usable_data.reject {|row| row[field] > 1000}
+          boxplot = Boxplot.new(d, group_key, group_idx, field)
+          puts "Median for #{field} in group #{group_idx}: #{boxplot.median}"
+          boxplots.push(boxplot)
+        end
+        BoxplotDiagram.new(boxplots).write_file(field.to_s + '.svg')
+      end
+
     end
 
     data = UsableDataFilter.new.filter(data)
@@ -134,6 +156,7 @@ module MainScript
     matrix = MatrixQuestionStats.new(survey_structure, data)
     matrix.histogram.each do |question, subquestion_data|
       group = self.survey_structure.grouping_for_question((question.to_s + 'Time').to_sym)
+
       subquestion_data.each do |subquestion, histograms|
         Histogram.new(self.survey_structure.group_labels_for_group(group), histograms).write_file(subquestion.to_s + '.svg')
       end
@@ -141,7 +164,6 @@ module MainScript
     end
 
     puts matrix.correctness
-
   end
 
   def self.augment_manually(data, json_name, keys_to_show, manual_data, field)

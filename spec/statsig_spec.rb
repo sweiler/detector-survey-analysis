@@ -1,7 +1,7 @@
 require './src/statsig'
 
 RSpec.describe Statsig do
-  it 'computes the significance for a hypothesis groupA > groupB' do
+  it 'computes the significance for a hypothesis groupA > groupB in y/n questions' do
     data = [{:true => 1, :false => 2}, {:true => 9, :false => 1}]
     generated_data = []
     data.each_with_index do |hsh, idx|
@@ -10,7 +10,7 @@ RSpec.describe Statsig do
     end
     expect(generated_data.length).to eq(13)
 
-    result = Statsig.significance_a_greater_b(generated_data, :group, 1, 0, :val)
+    result = Statsig.significance_a_greater_b_binary(generated_data, :group, 1, 0, :val)
     expect(result).to be_between(0.0001, 0.3)
   end
 end

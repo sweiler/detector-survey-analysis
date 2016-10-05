@@ -4,11 +4,12 @@ class Statsig
     @data = data
   end
 
-  def self.significance_a_greater_b(data, grouping_key, group_a, group_b, value_key)
+  def self.significance_a_greater_b_binary(data, grouping_key, group_a, group_b, value_key)
     Statsig.new(data).run_a_greater_b(grouping_key, group_a, group_b, value_key)
 
 
   end
+
 
   def run_a_greater_b(grouping_key, group_a, group_b, value_key)
     count_a = count_for(grouping_key, group_a, value_key)
@@ -23,6 +24,7 @@ class Statsig
 
     p_a_geq_than_observed * p_b_leq_than_observed
   end
+
 
   private
   def count_total(grouping_key, group_value)

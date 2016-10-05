@@ -13,7 +13,11 @@ class SurveyStructure
             :understoodFisExists => :yes_no,
             :understoodCipher => :yes_no,
             :jdbcConfN => :matrixA1A5,
-            :byteBufferConfN => :matrixA1A5
+            :byteBufferConfN => :matrixA1A5,
+            :listCheckTime => :time,
+            :createFileTime => :time,
+            :fisGraphTime => :time,
+            :cipherGraphTime => :time
         },
         :sub_questions => {
             :jdbcConfN => {
@@ -171,4 +175,5 @@ class SurveyStructure
   def field_label(field)
     @structure[:field_labels][field]
   end
+
 end
