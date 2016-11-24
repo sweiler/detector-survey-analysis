@@ -12,7 +12,7 @@ Just execute `./analyze <filename>` where `<filename>` is the csv file with all 
 
 Before you can run any tests, you have to install the required gems using bundler:
 
-    bundle instal
+    bundle install
 
 To run the tests, execute
 
