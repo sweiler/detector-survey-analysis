@@ -152,7 +152,7 @@ module MainScript
     end
 
     data = UsableDataFilter.new.filter(data)
-
+    puts "Participants general: #{data.length}"
     matrix = MatrixQuestionStats.new(survey_structure, data)
     matrix.histogram.each do |question, subquestion_data|
       group = self.survey_structure.grouping_for_question((question.to_s + 'Time').to_sym)
