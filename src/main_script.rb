@@ -162,6 +162,10 @@ module MainScript
       end
 
     end
+    group_dist = GroupDistribution.new(self.survey_structure, data)
+    puts 'Group distribution:'
+      puts group_dist.counts[:randConf].each_with_index.map {|g, i| "#{survey_structure.group_labels_for_group(:randConf)[i]}: #{g}"}
+      puts ''
 
     puts matrix.correctness
   end
